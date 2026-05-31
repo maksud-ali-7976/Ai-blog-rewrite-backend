@@ -1,35 +1,44 @@
-// src/index.ts
-
-process.env.TZ = "Asia/Kolkata";
-
 import { Elysia } from "elysia";
 
+import { html } from "@elysiajs/html";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import { bearer } from "@elysiajs/bearer";
-
-import { connectDB } from "./db/mongo";
 import AppErr from "./utils/AppErr";
+
+import { bearer } from "@elysiajs/bearer";
+import env from "./config/env";
+import moment from "moment";
+
+import { createElysia } from "./utils/createElysia";
+import { logger } from "@typegoose/typegoose/lib/logSettings";
+import { connectDB } from "./db/mongo";
 import { R } from "./utils/response-helper";
-import { html } from "@elysiajs/html"
 import { adminRoutes } from "./api";
 import { Modules } from "./config/rabc/modules";
-import { createElysia } from "./utils/createElysia";
 
+declare module "elysia" { }
 
+const app = createElysia({ normalize: false });
 
-export const app = createElysia({ normalize: false });
+// app.onRequest((ctx: any) => {
+//     console.log(`Request`);
+//     console.log(`${ctx.request.method} - ${(ctx as any).path}`);
+// });
 
-
+// app.onAfterHandle(({ response }) => {
+//     console.log("Response - ");
+//     console.log(JSON.stringify(response, null, 2).substring(0, 150));
+//     console.log("Request End");
+// });
 
 app.use(
     cors({
         methods: "*",
-
-        origin: () => true,
+        origin: ({ headers }) => {
+            return true;
+        },
     }),
 );
-
 
 app.onError(({ error, code, set, ...rest }: any) => {
     if (error instanceof AppErr) {
@@ -40,7 +49,7 @@ app.onError(({ error, code, set, ...rest }: any) => {
     const errorType = "type" in error ? error.type : "internal";
 
     if (errorType == "internal") {
-        console.log(`${errorType} ERROR: ${JSON.stringify(error, null, 2)}`);
+
         set.status = "OK";
         return { status: false, message: error.message, data: null };
     } else if (errorType == "response") {
@@ -60,12 +69,11 @@ app.onError(({ error, code, set, ...rest }: any) => {
 
         return { status: false, message: message, data: null };
     }
-    console.log(`${errorType} ERRRO ❌: ${JSON.stringify(error, null, 2)}`);
 
     return { status: false, message: error.message, data: null };
 });
 
-app.onTransform(({ body = {}, params = {}, query = {} }) => {
+app.onTransform(({ body = {}, params = {}, query = {}, }) => {
     const removeWasteFromObject = (obj: Record<string, any> | any) => {
         for (let key in obj) {
             let value = obj[key];
@@ -82,6 +90,7 @@ app.onTransform(({ body = {}, params = {}, query = {} }) => {
     removeWasteFromObject(body);
     removeWasteFromObject(params);
     removeWasteFromObject(query);
+
 
 });
 
@@ -197,6 +206,7 @@ app.onAfterHandle((ctx) => {
 });
 
 
+
 app.use(
     swagger({
         path: "/swagger-admin-app",
@@ -215,47 +225,26 @@ app.use(
     }),
 );
 
+
 app.use(adminRoutes);
 
-
-
-export const routeMap: Map<
-    string,
-    {
-        modules: Modules[];
-    }
-> = new Map();
-
+export const routeMap: Map<string, { modules: Modules[]; }> = new Map();
 for (const route of app.routes) {
-    const summary =
-        route.hooks.detail?.summary;
-
-    if (!summary) {
-        continue;
-    }
-
+    const summary = route.hooks.detail?.summary;
+    if (!summary) continue;
     try {
-        const parsed = JSON.parse(
-            summary,
-        );
+        const parsed = JSON.parse(summary,);
+        routeMap.set(route.path, { modules: parsed.modules, });
+    }
+    catch (error) {
+        console.error("Invalid Summary:", route.path,);
 
-        routeMap.set(route.path, {
-            modules:
-                parsed.modules,
-        });
-    } catch (error) {
-        console.error(
-            "Invalid Summary:",
-            route.path,
-        );
     }
 }
-
-connectDB("ai-blog-write").then((d) => {
-    app.listen(process.env.PORT || 8080);
+connectDB("APP").then((d) => {
+    app.listen(env.port || 8080);
     console.log(
-        `🦊 Elysia is running at ${app.server?.hostname}:${process.env.PORT || 8080
-        }`,
+        `🦊 Elysia is running at ${app.server?.hostname}:${env.port || 8080
+        } ${moment().format("h:mm:ss a, MMMM Do YYYY")}`,
     );
 });
-

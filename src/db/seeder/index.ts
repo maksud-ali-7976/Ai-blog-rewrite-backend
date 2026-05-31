@@ -52,7 +52,7 @@ export const Seeder = async () => {
 
             super_admin: false,
 
-            level: RoleLevel.L2,
+            level: RoleLevel.L3,
 
             permissions: {
                 [Modules.DASHBOARD]: [

@@ -12,7 +12,7 @@ export interface ScrapedBlog {
     original_url: string;
 }
 
-export const scrapeBlog = async (
+export const ScrapeBlog = async (
     url: string,
 ): Promise<ScrapedBlog> => {
     const response = await fetch(url, {
@@ -37,7 +37,21 @@ export const scrapeBlog = async (
         );
 
     $(
-        "script, style, noscript, iframe",
+        `
+            script,
+            style,
+            noscript,
+            iframe,
+            nav,
+            header,
+            footer,
+            aside,
+            .ads,
+            .ad,
+            .banner,
+            .newsletter,
+            .sidebar
+            `,
     ).remove();
 
     const title =

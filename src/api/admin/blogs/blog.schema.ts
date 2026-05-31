@@ -35,6 +35,7 @@ export default {
         query: t.Object({
             page: t.String(),
             size: t.String(),
+            status: t.Optional(t.String())
         }),
         response: {
             200: t.Object({
@@ -68,6 +69,93 @@ export default {
         },
         detail: {
             operationId: "BlogCreate"
+        }
+    },
+    update: {
+        query: t.Object({
+            id: t.String()
+        }),
+        body: t.Object({
+            rewrite_title: t.Optional(t.String()),
+            review_notes: t.Optional(t.String()),
+            rewrite_content: t.Optional(t.String()),
+        }),
+        response: {
+            200: t.Object({
+                status: t.Boolean(),
+                message: t.String(),
+                data: BlogSchema
+            },
+                {
+                    description: "Blog Update Response"
+                }
+            )
+        },
+        detail: {
+            operationId: "BlogUpdate"
+        }
+    },
+    delete: {
+        query: t.Object({
+            id: t.String()
+        }),
+        response: {
+            200: t.Object({
+                status: t.Boolean(),
+                message: t.String(),
+                data: BlogSchema
+            },
+                {
+                    description: "Blog Delete Response"
+                }
+            )
+        },
+        detail: {
+            operationId: "BlogDelete"
+        }
+    },
+    reviewed: {
+        query: t.Object({
+            id: t.String()
+        }),
+        body: t.Object({
+            status: t.String()
+        }),
+        response: {
+            200: t.Object({
+                status: t.Boolean(),
+                message: t.String(),
+                data: BlogSchema
+            },
+                {
+                    description: "Blog Reviewed Response"
+                }
+            )
+        },
+        detail: {
+            operationId: "BlogReviewed"
+        }
+    },
+    publish: {
+        query: t.Object({
+            id: t.String()
+        }),
+        body: t.Object({
+            status: t.String()
+        }),
+        response: {
+            200: t.Object({
+                status: t.Boolean(),
+                message: t.String(),
+                data: BlogSchema
+            },
+                {
+                    description: "Blog Publish Response"
+                }
+            )
+        },
+        detail: {
+            operationId: "BlogPublish"
         }
     }
 }

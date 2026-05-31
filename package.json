@@ -4,6 +4,7 @@
   "scripts": {
     "test": "bun --watch src/test/test.ts",
     "dev": "bun run --watch src/index.ts",
+    "worker": "bun run --watch src/worker.ts",
     "build": "bun build src/index.ts --outdir ./build --sourcemap=external --target=node --external pdfkit --external node-appwrite",
     "push": "bun run build && git add . && git commit -m 'bug fixes' && git push origin $(git branch --show-current)"
   },
@@ -16,6 +17,7 @@
     "@elysiajs/static": "^1.2.0",
     "@elysiajs/stream": "^1.1.0",
     "@elysiajs/swagger": "^1.1.6",
+    "@sinclair/typebox": "^0.34.0",
     "@typegoose/typegoose": "^12.9.1",
     "@types/bcryptjs": "^3.0.0",
     "@types/consola": "^2.2.8",
@@ -30,7 +32,7 @@
     "consola": "^3.4.2",
     "cron": "^4.3.0",
     "dotenv": "^16.5.0",
-    "elysia": "1.1.25",
+    "elysia": "^1.4.28",
     "elysia-helmet": "^2.0.0",
     "firebase": "^11.6.0",
     "form-data": "^4.0.2",

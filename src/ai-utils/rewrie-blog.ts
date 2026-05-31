@@ -2,7 +2,7 @@ import { generateText } from "ai";
 
 import { google } from "src/config/ai";
 
-export const rewriteBlog =
+export const RewriteBlog =
     async (
         content: string,
     ) => {

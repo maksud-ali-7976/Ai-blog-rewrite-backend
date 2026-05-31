@@ -1,7 +1,29 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateImage } from "ai";
-import env from "src/config/env";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { google } from "src/config/ai";
 
-const google = createGoogleGenerativeAI({
-    apiKey: env.gemini_api_key || "",
-});
+export const GenerateCoverImage = async (
+    prompt: string,
+) => {
+    const { image } = await generateImage({
+        model: google.image("gemini-3.1-flash-image"),
+
+        prompt: `
+Create a professional blog cover image.
+
+Requirements:
+- Modern and clean design
+- High quality
+- No text on image
+- No watermark
+- Suitable for technology blog
+- Realistic and visually appealing
+- Landscape format (16:9)
+
+Topic:
+${prompt}
+        `,
+    });
+
+    return image;
+};

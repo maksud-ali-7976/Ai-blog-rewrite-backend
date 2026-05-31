@@ -8,6 +8,15 @@ export enum BlogStatus {
     PUBLISHED = "PUBLISHED"
 }
 
+export enum BlogGenStatus {
+    QUEUED = "QUEUED",
+    SCRAPING = "SCRAPING",
+    PROCESSING = "PROCESSING",
+    IMAGE_GENERATING = "IMAGE_GENERATING",
+    COMPLETED = "COMPLETED",
+    FAILED = "FAILED"
+}
+
 @modelOptions({ schemaOptions: { collection: "blog", timestamps: true } })
 export class BlogClass {
     @prop({})
@@ -38,7 +47,7 @@ export class BlogClass {
         enum: BlogStatus,
         default: BlogStatus.DRAFT,
     })
-    public status!: BlogStatus
+    public status!: string
 
     @prop({ ref: () => AdminClass })
     public review_by?: Ref<AdminClass>
@@ -48,6 +57,9 @@ export class BlogClass {
 
     @prop({})
     public review_notes?: string
+
+    @prop({ enum: BlogGenStatus, default: BlogGenStatus.QUEUED })
+    public gen_status!: string
 }
 
 export default getModelForClass(BlogClass)

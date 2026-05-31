@@ -5,7 +5,7 @@ import JWT from "src/utils/jwt";
 export const isAdminAuthenticated = async (
     Context: any,
 ) => {
-
+    console.log("Admin")
     const {
         set,
         headers,
@@ -32,12 +32,12 @@ export const isAdminAuthenticated = async (
             "Bearer ",
             "",
         );
-
+    // console.log("Token", token)
     const jwt =
         JWT.verify(
             token,
         );
-
+    // console.log("Jwt", jwt)
     if (!jwt) {
         set.status = 401;
 
@@ -71,7 +71,7 @@ export const isAdminAuthenticated = async (
         ).populate(
             "role",
         );
-
+    console.log("Admin", user)
     if (!user) {
         set.status = 401;
 
@@ -83,7 +83,9 @@ export const isAdminAuthenticated = async (
                 "User Not Found",
         };
     }
-
+    console.log("Route", route);
+    console.log("Path", Context.path);
+    console.log("RouteMap Keys", [...routeMap.keys()]);
     Context.user =
         user;
 
@@ -92,7 +94,7 @@ export const isAdminAuthenticated = async (
             route ||
             Context.path,
         );
-
+    console.log("Meta", meta)
     if (
         (user.role as any)
             ?.super_admin ||
@@ -107,13 +109,13 @@ export const isAdminAuthenticated = async (
 
     const moduleId =
         `${meta.modules[0]}`;
-
+    console.log("ModuleId", moduleId)
     const permission =
         (user.role as any)
             ?.permissions?.[
         moduleId
         ];
-
+    console.log("Persmission", permission)
     if (!permission) {
         set.status = 403;
 
@@ -127,12 +129,12 @@ export const isAdminAuthenticated = async (
 
     const method =
         request.method.toUpperCase();
-
+    console.log("Method", method)
     const ability =
         (
             abilityHttpMap as any
         )[method];
-
+    console.log("Ability", ability)
     if (!ability) {
         set.status = 403;
 
@@ -148,7 +150,7 @@ export const isAdminAuthenticated = async (
         permission.includes(
             ability,
         );
-
+    console.log("Has Access", hasAccess)
     if (!hasAccess) {
         set.status = 403;
 
