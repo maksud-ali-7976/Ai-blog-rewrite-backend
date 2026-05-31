@@ -12,20 +12,14 @@ export class AuditLogClass {
     @prop({ ref: () => AdminClass })
     public admin!: Ref<AdminClass>;
 
-    @prop({ required: true })
+    @prop({})
     public action!: string;
 
-    @prop({ required: true })
+    @prop({})
     public entity!: string;
 
     @prop()
     public entity_id!: string;
-
-    @prop()
-    public before?: string;
-
-    @prop()
-    public after?: string;
 
     @prop()
     public description?: string;

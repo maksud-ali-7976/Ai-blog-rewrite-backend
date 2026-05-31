@@ -9,6 +9,7 @@ import { customError } from "src/utils/AppErr";
 import { BlogRewriteQueue } from "src/queue/blog-rewrite-queue";
 import { url } from "zod/v4";
 import { RootFilterQuery } from "mongoose";
+import Audit from "src/models/Audit";
 
 const allowedHosts = [
     "research.ibm.com",
@@ -57,7 +58,7 @@ export default createElysia({ prefix: "/blogs" }).guard(
                 },
                 schema.list)
             .post("/",
-                async ({ body }) => {
+                async ({ body, user }) => {
                     let url = new URL(body.url)
                     if (!allowedHosts.includes(url.hostname)) {
                         return customError("Only IBM Research Blog and LangChain Blog are supported")
@@ -90,6 +91,13 @@ export default createElysia({ prefix: "/blogs" }).guard(
                             removeOnFail: false,
                         }
                     )
+                    await Audit.create({
+                        admin: user._id,
+                        action: "BLOG_CREATED",
+                        entity: "BLOG",
+                        entity_id: blog._id.toString(),
+                        description: `Blog rewrite requested for ${body.url}`,
+                    });
                     return R("Blog Rewriting...", blog)
 
                 },
@@ -107,7 +115,7 @@ export default createElysia({ prefix: "/blogs" }).guard(
                 },
                 schema.delete)
             .patch("/publish",
-                async ({ query, body }) => {
+                async ({ query, body, user }) => {
                     const blog = await Blog.findById(query.id)
                     if (!blog) {
                         return customError("Blog Not Found")
@@ -115,24 +123,41 @@ export default createElysia({ prefix: "/blogs" }).guard(
 
                     await Blog.findByIdAndUpdate(query.id,
                         {
-                            status: body.status
+                            status: body.status,
+                            publish_by: user._id,
+                            published_at: new Date()
                         }
                     )
-
+                    await Audit.create({
+                        admin: user._id,
+                        action: BlogStatus.PUBLISHED,
+                        entity: "BLOG",
+                        entity_id: blog._id.toString(),
+                        description: `Published blog "${blog.rewrite_title || blog.original_title}"`,
+                    });
                     return R("Blog Published Successfully")
                 },
                 schema.publish
             )
             .patch("/reviewer",
-                async ({ query, body }) => {
+                async ({ query, body, user }) => {
                     const exitsBlog = await Blog.findById(query.id);
                     if (!exitsBlog) {
                         return customError("Blog Not Found")
                     }
-                    const blog = await Blog.findByIdAndUpdate(query.id, {
+                    await Blog.findByIdAndUpdate(query.id, {
                         status: body.status,
+                        review_by: user._id,
                     })
-                    return R("Blog Reviewed Successfully", blog)
+
+                    await Audit.create({
+                        admin: user._id,
+                        action: BlogStatus.REVIEWED,
+                        entity: "BLOG",
+                        entity_id: exitsBlog._id.toString(),
+                        description: `Reviewed blog "${exitsBlog.rewrite_title || exitsBlog.original_title}"`,
+                    });
+                    return R("Blog Reviewed Successfully")
                 }, schema.reviewed
             )
 )
