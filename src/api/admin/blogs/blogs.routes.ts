@@ -63,8 +63,8 @@ export default createElysia({ prefix: "/blogs" }).guard(
                     if (!allowedHosts.includes(url.hostname)) {
                         return customError("Only IBM Research Blog and LangChain Blog are supported")
                     }
-
-                    if (!url.pathname.startsWith("/blog")) {
+                    console.log("Pathname", url.pathname)
+                    if (!url.pathname.includes("/blog")) {
                         return customError(
                             "Only blog URLs are supported"
                         );
@@ -72,7 +72,8 @@ export default createElysia({ prefix: "/blogs" }).guard(
                     const blog = await Blog.create({
                         original_url: body.url,
                         status: BlogStatus.DRAFT,
-                        gen_status: BlogGenStatus.QUEUED
+                        gen_status: BlogGenStatus.QUEUED,
+                        source: body.source
                     })
 
                     await BlogRewriteQueue.add("blog-rewrite",
@@ -103,8 +104,20 @@ export default createElysia({ prefix: "/blogs" }).guard(
                 },
                 schema.create)
             .put("/",
-                async ({ query, body }) => {
+                async ({ query, body, user }) => {
+                    const blogExits = await Blog.findById(query.id);
+                    if (!blogExits) {
+                        return customError("Blog Not Found")
+                    }
+
                     const blog = await Blog.findByIdAndUpdate(query.id, body)
+                    await Audit.create({
+                        action: "Blog Update",
+                        entity: "BLOG",
+                        entity_id: blog?._id.toString(),
+                        admin: user?._id,
+                        description: `Update Blog "${blog?.original_title || blog?.rewrite_title}" `
+                    })
                     return R("Blog Updated Successfully", blog)
                 },
                 schema.update)
@@ -159,5 +172,15 @@ export default createElysia({ prefix: "/blogs" }).guard(
                     });
                     return R("Blog Reviewed Successfully")
                 }, schema.reviewed
+            )
+            .get("/detail",
+                async ({ query }) => {
+                    const blog = await Blog.findById(query.id).populate("admin")
+
+                    if (!blog) {
+                        return customError("Blog Not Found")
+                    }
+                    return R("Blog Detail", blog)
+                }, schema.detail
             )
 )

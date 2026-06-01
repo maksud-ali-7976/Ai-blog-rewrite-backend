@@ -6,7 +6,7 @@ export const GenerateCoverImage = async (
     prompt: string,
 ) => {
     const { image } = await generateImage({
-        model: google.image("gemini-3.1-flash-image"),
+        model: google.image("gemini-3-pro-image-preview"),
 
         prompt: `
 Create a professional blog cover image.

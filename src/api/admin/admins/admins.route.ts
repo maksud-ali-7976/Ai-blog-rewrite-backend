@@ -48,10 +48,12 @@ export default createElysia({ prefix: "/admins" }).guard(
 
                 const [list, total] = await Promise.all(
                     [
-                        await Admin.find({})
+                        await Admin.find({
+                            super_admin: false
+                        })
                             .skip(page * size)
                             .limit(size)
-                            .populte("role"),
+                            .populate("role"),
                         await Admin.countDocuments()
                     ]
                 );

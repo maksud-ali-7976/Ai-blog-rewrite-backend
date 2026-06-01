@@ -32,7 +32,8 @@ export default {
             200: t.Object({
                 status: t.Boolean(),
                 message: t.String(),
-                data: t.Array(AdminSchema)
+                data: t.Array(AdminSchema),
+                meta: MetaPaginationSchema
             },
                 {
                     description: "Admins List Response"

@@ -3,7 +3,8 @@ dotenv.config();
 
 export default {
     // App
-    secret: process.env.APP_SECRET || "",
+    secret: process.env.JWT_SECRET || "",
+    ref_secret: "Ref@@123",
     port: (process.env.APP_PORT || 9000) as number,
     db_host: process.env.DB_HOST || "mongodb://127.0.0.1:27017/",
     db_name: process.env.DB_NAME || "ai-blog-rewrite",

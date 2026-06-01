@@ -60,6 +60,12 @@ export class BlogClass {
 
     @prop({ enum: BlogGenStatus, default: BlogGenStatus.QUEUED })
     public gen_status!: string
+
+    @prop({})
+    public source?: string
+
+    @prop({})
+    public error_message?: string
 }
 
 export default getModelForClass(BlogClass)

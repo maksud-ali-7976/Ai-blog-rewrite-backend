@@ -20,6 +20,10 @@ export const BlogSchema = t.Object({
         name: t.String()
     }),
     status: t.String(),
+    gen_status: t.String(),
+    source: t.String(),
+    createdAt: t.String(),
+    updatedAt: t.String()
 
 })
 
@@ -41,7 +45,8 @@ export default {
             200: t.Object({
                 status: t.Boolean(),
                 message: t.String(),
-                data: BlogSchema
+                data: t.Array(BlogSchema),
+                meta: MetaPaginationSchema
             },
                 {
                     description: "Blog List Response"
@@ -54,7 +59,8 @@ export default {
     },
     create: {
         body: t.Object({
-            url: t.String()
+            url: t.String(),
+            source: t.String()
         }),
         response: {
             200: t.Object({
@@ -156,6 +162,23 @@ export default {
         },
         detail: {
             operationId: "BlogPublish"
+        }
+    },
+    detail: {
+        query: t.Object({
+            id: t.String()
+        }),
+        response: {
+            200: t.Object({
+                staus: t.Boolean(),
+                message: t.String(),
+                data: BlogSchema
+            }, {
+                description: "Blog Detail Response"
+            })
+        },
+        detail: {
+            operationId: "BlogDetail"
         }
     }
 }

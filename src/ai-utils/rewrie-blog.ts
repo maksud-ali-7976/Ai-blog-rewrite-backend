@@ -11,7 +11,7 @@ export const RewriteBlog =
             await generateText({
                 model:
                     google(
-                        "gemini-3.5-flash",
+                        "gemini-3.1-flash-lite",
                     ),
 
                 system: `

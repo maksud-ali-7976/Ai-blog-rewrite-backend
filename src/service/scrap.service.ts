@@ -38,20 +38,20 @@ export const ScrapeBlog = async (
 
     $(
         `
-            script,
-            style,
-            noscript,
-            iframe,
-            nav,
-            header,
-            footer,
-            aside,
-            .ads,
-            .ad,
-            .banner,
-            .newsletter,
-            .sidebar
-            `,
+    script,
+    style,
+    noscript,
+    iframe,
+    footer,
+    aside,
+    .ads,
+    .ad,
+    .banner,
+    .newsletter,
+    .sidebar,
+    .related-posts,
+    .related-content
+`
     ).remove();
 
     const title =
@@ -64,19 +64,11 @@ export const ScrapeBlog = async (
             .text()
             .trim();
 
-    const author =
-        $(
-            "meta[name='author']",
-        ).attr(
-            "content",
-        ) ||
-        $(
-            "[rel='author']",
-        )
-            .first()
-            .text()
-            .trim() ||
-        "Unknown";
+    let author =
+        $(".blog-author-name-item").first().text().trim() ||
+        $("meta[name='author']").attr("content") ||
+        $("meta[property='article:author']").attr("content") ||
+        "";
 
     const published_at =
         $(
@@ -102,44 +94,52 @@ export const ScrapeBlog = async (
     ];
 
     for (const selector of selectors) {
-        const text =
-            $(selector)
-                .text()
-                .replace(
-                    /\s+/g,
-                    " ",
-                )
-                .trim();
+        const text = $(selector)
+            .text()
+            .replace(/\s+/g, " ")
+            .trim();
 
-        if (
-            text &&
-            text.length >
-            500
-        ) {
-            content =
-                text;
-
+        if (text && text.length > 500) {
+            content = text;
             break;
         }
     }
 
     if (!content) {
-        content =
-            $("body")
-                .text()
-                .replace(
-                    /\s+/g,
-                    " ",
-                )
-                .trim();
+        content = $("body")
+            .text()
+            .replace(/\s+/g, " ")
+            .trim();
     }
 
-    content =
-        content.slice(
-            0,
-            20000,
-        );
+    // Cleanup unwanted sections
+    content = content
+        .split("Related content")[0]
+        .split("Sign up for our newsletter")[0]
+        .split("See what your agent is really doing")[0]
+        .trim();
 
+    // Remove header junk before article starts
+    if (content.includes("Key Takeaways")) {
+        content =
+            "Key Takeaways" +
+            content.split("Key Takeaways")[1];
+    }
+
+    content = content.slice(0, 20000);
+
+
+    if (!author) {
+        const match = content.match(/Authors(.*?)Topics/i);
+
+        if (match?.[1]) {
+            author = match[1]
+                .replace(/([a-z])([A-Z])/g, "$1, $2")
+                .trim();
+        }
+    }
+
+    author = author || "Unknown";
     return {
         title,
 

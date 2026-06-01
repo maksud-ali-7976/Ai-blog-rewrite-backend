@@ -29,7 +29,7 @@ export default {
                 {
                     status: t.Boolean(),
                     message: t.String(),
-                    data: t.Any(t.Array(RoleSchema)),
+                    data: t.Array(RoleSchema),
                     meta: MetaPaginationSchema,
                 },
                 {

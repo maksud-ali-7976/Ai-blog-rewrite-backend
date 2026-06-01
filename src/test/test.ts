@@ -13,49 +13,49 @@ const run =
         console.log("Test Started....")
         const ScrapResult =
             await ScrapeBlog(
-                "https://www.ibm.com/think/topics/artificial-intelligence",
+                "https://www.ibm.com/quantum/blog/qiskit-summer-school-2026",
             );
         console.log("Scraoed Result", ScrapResult)
-        const AirewriteResult =
-            await RewriteBlog(ScrapResult.content);
+        // const AirewriteResult =
+        //     await RewriteBlog(ScrapResult.content);
 
-        console.log("Result", AirewriteResult);
+        // console.log("Result", AirewriteResult);
 
-        const coverImage = await GenerateCoverImage(AirewriteResult.cover_image_prompt);
-        console.log("Cover Image", coverImage)
-        const buffer = Buffer.from(
-            coverImage.base64,
-            "base64"
-        );
-        const file = new File(
-            [buffer],
-            `cover-${Date.now()}.jpg`,
-            {
-                type: coverImage.mediaType,
-            }
-        );
+        // const coverImage = await GenerateCoverImage(AirewriteResult.cover_image_prompt);
+        // console.log("Cover Image", coverImage)
+        // const buffer = Buffer.from(
+        //     coverImage.base64,
+        //     "base64"
+        // );
+        // const file = new File(
+        //     [buffer],
+        //     `cover-${Date.now()}.jpg`,
+        //     {
+        //         type: coverImage.mediaType,
+        //     }
+        // );
 
-        console.log(
-            "Generated Image:",
-            file.name,
-            file.type,
-            file.size
-        );
-        const fileName =
-            `cover-${Date.now()}.jpg`;
+        // console.log(
+        //     "Generated Image:",
+        //     file.name,
+        //     file.type,
+        //     file.size
+        // );
+        // const fileName =
+        //     `cover-${Date.now()}.jpg`;
 
-        const filePath =
-            `uploads/blogs/${fileName}`;
+        // const filePath =
+        //     `uploads/blogs/${fileName}`;
 
-        await Bun.write(
-            filePath,
-            coverImage.uint8Array
-        );
+        // await Bun.write(
+        //     filePath,
+        //     coverImage.uint8Array
+        // );
 
-        console.log(
-            "Saved:",
-            filePath
-        );
+        // console.log(
+        //     "Saved:",
+        //     filePath
+        // );
         console.log("Completed....")
     };
 

@@ -23,7 +23,8 @@ export default createElysia({ prefix: "/audit" }).guard(
                     [
                         await Audit.find()
                             .skip(page * size)
-                            .limit(size),
+                            .limit(size)
+                            .populate("admin"),
                         await Audit.countDocuments({})
                     ]
                 )

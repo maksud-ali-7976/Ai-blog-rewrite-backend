@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { MetaPaginationSchema } from "../blogs/blog.schema";
 
 export const AuditSchema = t.Object({
     _id: t.String(),
@@ -32,7 +33,8 @@ export default {
             200: t.Object({
                 status: t.Boolean(),
                 message: t.String(),
-                data: t.Array(AuditSchema)
+                data: t.Array(AuditSchema),
+                meta: MetaPaginationSchema
             },
                 {
                     description: "Audit List Response"

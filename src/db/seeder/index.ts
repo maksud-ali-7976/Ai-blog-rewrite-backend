@@ -6,13 +6,16 @@ import { HashPassword } from "src/utils/hash";
 
 
 export const Seeder = async () => {
-    const superAdminRole =
-        await Role.create({
+    let superAdminRole = await Role.findOne({ name: "SUPER ADMIN", super_admin: true })
+
+    if (!superAdminRole) {
+        superAdminRole = await Role.create({
             name: "SUPER ADMIN",
             level: RoleLevel.L1,
             permissions: {},
             super_admin: true
         })
+    }
 
     await Role.findOneAndUpdate(
         {
