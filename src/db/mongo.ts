@@ -10,7 +10,7 @@ export async function connectDB(thread: any) {
         mongoose.set("strictPopulate", false);
         const db = await mongoose.connect(env.uri, { dbName: env.db_name });
         console.log(`Database is connected from ${thread} to:`, db.connection.name);
-        // Seeder()
+        Seeder()
         return db;
 
     } catch (error) {
