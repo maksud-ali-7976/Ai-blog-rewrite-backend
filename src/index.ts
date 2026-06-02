@@ -100,110 +100,158 @@ app.use(html());
 
 app.onAfterHandle((ctx) => {
     const isJsonPath = ctx.path.includes("/json");
+
     const normalizeContentType = (type: string) => {
         switch (type) {
             case "json":
             case "application/json":
                 return "application/json";
+
             case "text":
             case "text/plain":
                 return "text/plain";
+
             case "formdata":
             case "multipart/form-data":
                 return "multipart/form-data";
+
             case "urlencoded":
             case "application/x-www-form-urlencoded":
                 return "application/x-www-form-urlencoded";
+
             case "arrayBuffer":
             case "application/octet-stream":
                 return "application/octet-stream";
+
             default:
                 return type;
         }
     };
+
     const toOpenApiPath = (path: string) =>
         path
             .split("/")
             .map((segment) => {
                 if (segment.startsWith(":")) {
                     let name = segment.slice(1);
-                    if (name.endsWith("?")) name = name.slice(0, -1);
+
+                    if (name.endsWith("?")) {
+                        name = name.slice(0, -1);
+                    }
+
                     return `{${name}}`;
                 }
+
                 return segment;
             })
             .join("/");
+
     const buildRequestBodyContentTypeOverrides = () => {
         const overrides = new Map<string, string[]>();
+
         for (const route of app.routes) {
             const rawType =
                 (route.hooks as any)?.type ??
                 (route.hooks as any)?.contentType ??
                 (route.hooks as any)?.mediaType;
+
             if (!rawType) continue;
 
             const types = Array.isArray(rawType) ? rawType : [rawType];
-            const normalized = types.map(normalizeContentType).filter(Boolean);
+
+            const normalized = types
+                .map(normalizeContentType)
+                .filter(Boolean);
+
             if (!normalized.length) continue;
 
             const path = toOpenApiPath(route.path);
-            overrides.set(`${route.method.toLowerCase()} ${path}`, normalized);
+
+            overrides.set(
+                `${route.method.toLowerCase()} ${path}`,
+                normalized,
+            );
         }
+
         return overrides;
     };
+
     const pruneRequestBodyContentTypes = (doc: any) => {
         if (!doc?.paths) return;
+
         const overrides = buildRequestBodyContentTypeOverrides();
+
         for (const [path, methods] of Object.entries(doc.paths)) {
-            for (const [method, operation] of Object.entries(methods as any)) {
+            for (const [method, operation] of Object.entries(
+                methods as any,
+            )) {
                 const requestBody = (operation as any)?.requestBody;
+
                 const content = requestBody?.content;
+
                 if (!content) continue;
 
                 const allowed = overrides.get(`${method} ${path}`);
+
                 if (!allowed?.length) continue;
 
                 const filtered: Record<string, any> = {};
+
                 for (const type of allowed) {
-                    if (content[type]) filtered[type] = content[type];
+                    if (content[type]) {
+                        filtered[type] = content[type];
+                    }
                 }
+
                 if (Object.keys(filtered).length > 0) {
                     requestBody.content = filtered;
                 }
             }
         }
     };
+
     const handleJsonSchema = (obj: any) => {
         for (let key in obj) {
             let value = obj[key];
+
             if (typeof value == "object" && !Array.isArray(value)) {
                 if (`${key}`.startsWith("/admin")) {
                     continue;
                 }
+
                 if (value.description == "upload") {
-                    // value.consumes = ["multipart/form-data"];
                     delete obj[key];
                 }
+
                 if (value?.description == "file") {
                     for (let jkey in value) {
                         if (jkey != "type") {
                             delete value[jkey];
                         }
                     }
+
                     value.type = "file";
-                    // value.format = "binary";
                 }
+
                 handleJsonSchema(obj[key]);
             }
         }
+
         return obj;
     };
 
-    if (isJsonPath) {
+    // IMPORTANT FIX
+    // Don't touch native Response/stream objects
+    if (
+        isJsonPath &&
+        ctx.response &&
+        !(ctx.response instanceof Response)
+    ) {
         handleJsonSchema(ctx.response);
         pruneRequestBodyContentTypes(ctx.response);
     }
 });
+
 
 
 

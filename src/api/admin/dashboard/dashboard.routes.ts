@@ -66,7 +66,7 @@ export default createElysia({ prefix: "/dasboard" }).guard(
 
                     reviewed_blog = await Blog.countDocuments({
                         status: BlogStatus.REVIEWED,
-                        reviewed_by: admin._id,
+                        review_by: admin._id,
                     });
                 }
                 else if (role?.level === RoleLevel.L3) {
@@ -78,7 +78,7 @@ export default createElysia({ prefix: "/dasboard" }).guard(
 
                     total_blog = await Blog.countDocuments({
                         status: BlogStatus.PUBLISHED,
-                        published_by: admin._id,
+                        publish_by: admin._id,
                     });
 
                     published_blog = total_blog;

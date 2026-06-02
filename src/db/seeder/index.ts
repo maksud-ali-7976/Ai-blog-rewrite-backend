@@ -85,12 +85,9 @@ export const Seeder = async () => {
 
             email: "admin@example.com",
 
-            password: await HashPassword(
+            password: HashPassword(
                 "Admin@123",
             ),
-
-            phone: "9999999999",
-
             role: superAdminRole._id,
 
             super_admin: true,
