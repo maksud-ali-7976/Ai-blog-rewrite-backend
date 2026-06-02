@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { ScrapeBlog } from "src/service/scrap.service";
-import { RewriteBlog } from "src/ai-utils/rewrie-blog";
+import { RewriteBlog } from "src/ai-utils/rewrite-blog";
 import { GenerateCoverImage } from "src/ai-utils/rewrite-cover-image-genrater";
 import { generateImage } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";

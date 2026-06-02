@@ -1,5 +1,5 @@
 import { routeMap } from "src";
-import { abilityHttpMap } from "src/config/rabc/abilities";
+import { abilityHttpMap, AbilityMap } from "src/config/rabc/abilities";
 import Admin from "src/models/Admin";
 import JWT from "src/utils/jwt";
 export const isAdminAuthenticated = async (
@@ -129,11 +129,25 @@ export const isAdminAuthenticated = async (
 
     const method =
         request.method.toUpperCase();
-    console.log("Method", method)
-    const ability =
-        (
-            abilityHttpMap as any
-        )[method];
+
+    let ability =
+        (abilityHttpMap as any)[method];
+    console.log("Method", request.method);
+    console.log("Path", Context.path);
+    if (
+        method === "PATCH" &&
+        Context.path.includes("/publish")
+    ) {
+        ability = AbilityMap.PUBLISH;
+    }
+
+    if (
+        method === "PATCH" &&
+        Context.path.includes("/review")
+    ) {
+        ability = AbilityMap.REVIEW;
+    }
+
     console.log("Ability", ability)
     if (!ability) {
         set.status = 403;

@@ -10,6 +10,8 @@ import { BlogRewriteQueue } from "src/queue/blog-rewrite-queue";
 import { url } from "zod/v4";
 import { RootFilterQuery } from "mongoose";
 import Audit from "src/models/Audit";
+import Admin from "src/models/Admin";
+import { RoleLevel } from "src/models/Role";
 
 const allowedHosts = [
     "research.ibm.com",
@@ -29,14 +31,44 @@ export default createElysia({ prefix: "/blogs" }).guard(
     (app) =>
         app
             .get("/",
-                async ({ query }) => {
+                async ({ query, user }) => {
                     const page = parseInt(query.page || "0");
                     const size = parseInt(query.size || "10");
                     let fillter: RootFilterQuery<BlogClass> = {};
 
-                    if (query.status && query.status !== "all") {
-                        fillter.status = query.status
+                    const admin = await Admin.findById(user._id).populate("role");
+
+                    if (!admin) return customError("User Not Found")
+
+
+
+                    if (!admin.super_admin) {
+                        const role = admin.role as any;
+
+                        if (role?.level === RoleLevel.L2) {
+                            const allowedStatuses = [
+                                BlogStatus.DRAFT,
+                                BlogStatus.REVIEWED,
+                            ];
+
+                            if (
+                                query.status &&
+                                query.status !== "all" &&
+                                allowedStatuses.includes(query.status as BlogStatus)
+                            ) {
+                                fillter.status = query.status;
+                            } else {
+                                fillter.status = {
+                                    $in: allowedStatuses,
+                                };
+                            }
+                        }
+
+                        if (role?.level === RoleLevel.L3) {
+                            fillter.status = BlogStatus.REVIEWED;
+                        }
                     }
+
                     const [list, total] = await Promise.all(
                         [
                             await Blog.find(fillter)
@@ -152,7 +184,7 @@ export default createElysia({ prefix: "/blogs" }).guard(
                 },
                 schema.publish
             )
-            .patch("/reviewer",
+            .patch("/review",
                 async ({ query, body, user }) => {
                     const exitsBlog = await Blog.findById(query.id);
                     if (!exitsBlog) {

@@ -2,11 +2,13 @@
   "name": "ai-story-book",
   "version": "1.0.50",
   "scripts": {
-    "test": "bun --watch src/test/test.ts",
     "dev": "bun run --watch src/index.ts",
     "worker": "bun run --watch src/worker.ts",
-    "build": "bun build src/index.ts --outdir ./build --sourcemap=external --target=node --external pdfkit --external node-appwrite",
-    "push": "bun run build && git add . && git commit -m 'bug fixes' && git push origin $(git branch --show-current)"
+    "build:api": "bun build src/index.ts --outdir ./build --target=node --external pdfkit --external node-appwrite",
+    "build:worker": "bun build src/worker.ts --outdir ./build --target=node --external pdfkit --external node-appwrite",
+    "build": "bun run build:api && bun run build:worker",
+    "start": "bun build/index.js",
+    "start:worker": "bun build/worker.js"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.64",
@@ -40,7 +42,7 @@
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "mongoose": "^8.8.0",
-    "node-appwrite": "11.0.0",
+    "node-appwrite": "15.0.1",
     "nodemailer": "^6.10.1",
     "openmeteo": "^1.2.0",
     "pdfkit": "^0.17.0",

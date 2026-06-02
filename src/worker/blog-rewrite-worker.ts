@@ -1,5 +1,5 @@
 import { Job, Worker } from "bullmq";
-import { RewriteBlog } from "src/ai-utils/rewrie-blog";
+import { RewriteBlog } from "src/ai-utils/rewrite-blog";
 import redis from "src/db/redis";
 import Blog, { BlogGenStatus } from "src/models/Blog";
 import { BlogCoverImageQueue } from "src/queue/blog-cover-image-queue";

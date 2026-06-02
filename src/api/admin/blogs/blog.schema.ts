@@ -85,6 +85,7 @@ export default {
             rewrite_title: t.Optional(t.String()),
             review_notes: t.Optional(t.String()),
             rewrite_content: t.Optional(t.String()),
+            author: t.Optional(t.String()),
         }),
         response: {
             200: t.Object({
